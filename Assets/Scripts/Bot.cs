@@ -11,7 +11,7 @@ public class Bot : MonoBehaviour
 {
     NavMeshAgent agent; //compoñente NavMeshAgent para movemento polo NavMesh
     public GameObject target; //obxectivo ao que o axente reacciona
-    Drive ds; //referencia ao script Drive do obxectivo
+    PlayerController playerController; //referencia ao script PlayerController do obxectivo
 
     //=============================================================================
     // inicializa as referencias aos compoñentes necesarios
@@ -19,7 +19,7 @@ public class Bot : MonoBehaviour
     void Start()
     {
         agent = this.GetComponent<NavMeshAgent>();
-        ds = target.GetComponent<Drive>();
+        playerController = target.GetComponent<PlayerController>();
     }
 
     //=============================================================================
@@ -59,14 +59,14 @@ public class Bot : MonoBehaviour
         float toTarget = Vector3.Angle(this.transform.forward, this.transform.TransformVector(targetDir));
 
         //se o axente está detrás e indo na mesma dirección ou o obxectivo se detivo entón só buscar
-        if ((toTarget > 90 && relativeHeading < 20) || ds.currentSpeed < 0.01f)
+        if ((toTarget > 90 && relativeHeading < 20) || playerController.currentSpeed < 0.01f)
         {
             Seek(target.transform.position);
             return;
         }
 
         //calcular canto mirar cara adiante e engadilo á localización de busca
-        float lookAhead = targetDir.magnitude / (agent.speed + ds.currentSpeed);
+        float lookAhead = targetDir.magnitude / (agent.speed + playerController.currentSpeed);
         Seek(target.transform.position + target.transform.forward * lookAhead);
     }
 
@@ -77,7 +77,7 @@ public class Bot : MonoBehaviour
     void Evade()
     {
         Vector3 targetDir = target.transform.position - this.transform.position;
-        float lookAhead = targetDir.magnitude / (agent.speed + ds.currentSpeed);
+        float lookAhead = targetDir.magnitude / (agent.speed + playerController.currentSpeed);
 
         //igual que Pursue pero en lugar de Seek estamos fuxindo
         Flee(target.transform.position + target.transform.forward * lookAhead);

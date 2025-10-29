@@ -6,7 +6,7 @@ using UnityEngine;
 // Controla o movemento dun obxecto mediante entrada do usuario
 // Permite mover o obxecto cara adiante/atrás e rotalo á esquerda/dereita
 //=============================================================================
-public class Drive : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public float speed = 10.0f; //a velocidade base á que o obxecto se move cara adiante ou cara atrás
     public float rotationSpeed = 100.0f; //a velocidade base á que o obxecto rota á esquerda ou á dereita
