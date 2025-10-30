@@ -5,14 +5,12 @@ using UnityEngine.AI;
 
 //=============================================================================
 // Controla o comportamento dun axente autónomo que se move polo NavMesh
-// Implementa o comportamento de steering Seek (perseguir o obxectivo)
+// Implementa o comportamento de steering Wander (deambular aleatoriamente)
 //=============================================================================
-public class SeekAI : MonoBehaviour
+public class WanderAI : MonoBehaviour
 {
     NavMeshAgent agent; // Compoñente NavMeshAgent para movemento polo NavMesh
-    public GameObject target; // Obxectivo ao que o axente persegue
-
-    public int targetInRange = 5; // Distancia mínima para considerar o obxectivo dentro do rango
+    Vector3 wanderTarget = Vector3.zero; // Punto de deambulación no círculo, almacenado entre frames
 
     //=============================================================================
     // Inicializa as referencias aos compoñentes necesarios
@@ -31,25 +29,35 @@ public class SeekAI : MonoBehaviour
     }
 
     //=============================================================================
-    // Determina o lonxe que está o obxectivo do axente
+    // Deambula polo mapa de forma aleatoria usando o algoritmo de círculo de deambulación
     //=============================================================================
-    bool TargetInRange()
+    void Wander()
     {
-        // Se o obxectivo está a menos da distancia definida en targetInRange, considérao dentro do rango
-        // para afectar o comportamento do axente
-        if (Vector3.Distance(transform.position, target.transform.position) < targetInRange)
-            return true;
-        return false;
+        float wanderRadius = 10; // Radio do círculo de deambulación
+        float wanderDistance = 10; // Distancia do círculo á fronte do axente
+        float wanderJitter = 1; // Cantidade de aleatoriedade aplicada cada frame
+
+        //determinar unha localización nun círculo 
+        wanderTarget += new Vector3(Random.Range(-1.0f, 1.0f) * wanderJitter,
+                                        0,
+                                        Random.Range(-1.0f, 1.0f) * wanderJitter);
+        wanderTarget.Normalize();
+        //proxectar o punto ao radio do círculo
+        wanderTarget *= wanderRadius;
+
+        //mover o círculo cara adiante do axente á distancia de deambulación
+        Vector3 targetLocal = wanderTarget + new Vector3(0, 0, wanderDistance);
+        //calcular a localización mundial do punto no círculo
+        Vector3 targetWorld = this.gameObject.transform.InverseTransformVector(targetLocal);
+
+        Seek(targetWorld);
     }
 
     //=============================================================================
-    // Actualiza o comportamento do axente cada frame, movéndoo cara á posición do obxectivo
+    // Actualiza o comportamento do axente cada frame, deambulando aleatoriamente polo mapa
     //=============================================================================
     void Update()
     {
-        if (TargetInRange())
-            agent.ResetPath(); // Se o obxectivo está dentro do rango, detén o movemento
-        else
-            Seek(target.transform.position);
+        Wander();
     }
 }

@@ -5,14 +5,14 @@ using UnityEngine.AI;
 
 //=============================================================================
 // Controla o comportamento dun axente autónomo que se move polo NavMesh
-// Implementa o comportamento de steering Seek (perseguir o obxectivo)
+// Implementa o comportamento de steering Flee (fuxir do obxectivo)
 //=============================================================================
-public class SeekAI : MonoBehaviour
+public class FleeAI : MonoBehaviour
 {
     NavMeshAgent agent; // Compoñente NavMeshAgent para movemento polo NavMesh
-    public GameObject target; // Obxectivo ao que o axente persegue
+    public GameObject target; // Obxectivo do que o axente foxe
 
-    public int targetInRange = 5; // Distancia mínima para considerar o obxectivo dentro do rango
+    public int targetInRange = 50; // Distancia mínima para considerar o obxectivo dentro do rango e activar a fuga
 
     //=============================================================================
     // Inicializa as referencias aos compoñentes necesarios
@@ -23,11 +23,17 @@ public class SeekAI : MonoBehaviour
     }
 
     //=============================================================================
-    // Envía o axente a unha localización no NavMesh
+    // Envía o axente na dirección oposta a unha localización no NavMesh
     //=============================================================================
-    void Seek(Vector3 location)
+    void Flee(Vector3 location)
     {
-        agent.SetDestination(location);
+        //calcular o vector na dirección contraria á localización
+        //este é 180 graos ao vector cara á localización
+        Vector3 fleeVector = location - this.transform.position;
+
+        //restar este vector da posición do axente e 
+        //establecer isto como a nova localización no NavMesh
+        agent.SetDestination(this.transform.position - fleeVector);
     }
 
     //=============================================================================
@@ -36,20 +42,20 @@ public class SeekAI : MonoBehaviour
     bool TargetInRange()
     {
         // Se o obxectivo está a menos da distancia definida en targetInRange, considérao dentro do rango
-        // para afectar o comportamento do axente
+        // para que o axente active o comportamento de fuxir
         if (Vector3.Distance(transform.position, target.transform.position) < targetInRange)
             return true;
         return false;
     }
 
     //=============================================================================
-    // Actualiza o comportamento do axente cada frame, movéndoo cara á posición do obxectivo
+    // Actualiza o comportamento do axente cada frame, afastándoo do obxectivo se está en rango
     //=============================================================================
     void Update()
     {
         if (TargetInRange())
-            agent.ResetPath(); // Se o obxectivo está dentro do rango, detén o movemento
+            Flee(target.transform.position); // Se o obxectivo está dentro do rango, foxe del
         else
-            Seek(target.transform.position);
+            agent.ResetPath(); // Se o obxectivo está fóra do rango, detén o movemento
     }
 }
